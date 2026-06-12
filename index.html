@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VidEdit — Free Browser Video Editor</title>
+<meta name="description" content="Edit any video directly in your browser. No uploads, no servers. Your files stay on your device.">
+<meta name="robots" content="index, follow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><polygon points='12,8 26,16 12,24' fill='%2338bdf8'/></svg>">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" rx="8" fill="#0f172a"/><polygon points="12,8 26,16 12,24" fill="#38bdf8"/></svg>
+    VidEdit
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="editor.html">Editor</a></li>
+    <li><a href="pages/about.html">About</a></li>
+    <li><a href="pages/faq.html">FAQ</a></li>
+    <li><a href="pages/donate.html">Donate</a></li>
+    <li><a href="pages/privacy.html">Privacy</a></li>
+  </ul>
+  <a href="editor.html" class="btn-primary nav-cta">Open Editor</a>
+  <button class="nav-hamburger" id="menuToggle" aria-label="Toggle menu">&#9776;</button>
+</nav>
+
+<div class="nav-mobile" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="editor.html">Editor</a>
+  <a href="pages/about.html">About</a>
+  <a href="pages/faq.html">FAQ</a>
+  <a href="pages/donate.html">Donate</a>
+  <a href="pages/privacy.html">Privacy</a>
+  <a href="editor.html" class="btn-primary" style="margin-top:0.5rem;display:block;text-align:center;">Open Editor</a>
+</div>
+
+<section class="hero">
+  <div class="hero-badge">100% Free & Open Source</div>
+  <h1 class="hero-title">Edit Videos <span class="accent">Right in Your Browser</span></h1>
+  <p class="hero-sub">Trim, cut, crop, add text, merge clips, adjust speed, apply filters — all without uploading a single frame. Your video never leaves your device.</p>
+  <div class="hero-actions">
+    <a href="editor.html" class="btn-primary btn-lg">Start Editing Free</a>
+    <a href="pages/about.html" class="btn-ghost btn-lg">Learn More</a>
+  </div>
+  <div class="hero-note">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    No sign-up required. No file upload. Zero server storage. Works offline.
+  </div>
+</section>
+
+<section class="features">
+  <div class="container">
+    <h2 class="section-title">Everything You Need to Edit</h2>
+    <p class="section-sub">Professional-grade tools that run entirely client-side using the Web APIs your browser already has.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">✂️</div>
+        <h3>Trim & Cut</h3>
+        <p>Precisely trim your video or cut out unwanted sections with frame-accurate controls.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <h3>Merge Clips</h3>
+        <p>Combine multiple video files into one seamless export.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔲</div>
+        <h3>Crop & Resize</h3>
+        <p>Crop to any aspect ratio — 16:9, 9:16, 1:1, 4:3 or fully custom.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">T</div>
+        <h3>Text Overlay</h3>
+        <p>Add animated or static text with custom fonts, sizes, colors, and positions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Speed Control</h3>
+        <p>Speed up or slow down clips from 0.25× to 4× with audio pitch correction.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>Filters & Color</h3>
+        <p>Adjust brightness, contrast, saturation, hue — plus a library of one-click filters.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔊</div>
+        <h3>Audio Tools</h3>
+        <p>Mute, fade in/out, adjust volume, or strip audio from your video entirely.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <h3>Export Any Format</h3>
+        <p>Export as WebM or MP4 at your chosen quality. Files saved directly to your Downloads.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>100% Private</h3>
+        <p>All processing happens in your browser using Canvas & Web APIs. Nothing is transmitted.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works">
+  <div class="container">
+    <h2 class="section-title">How It Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Open Your Video</h3>
+        <p>Drag and drop or browse to select any video file from your device. Any resolution, any format.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Edit in the Browser</h3>
+        <p>Use the timeline, filters, text tools, and trim handles. Preview changes in real time.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Export & Download</h3>
+        <p>Click Export, choose your quality settings, and the file saves directly to your Downloads folder.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-strip">
+  <h2>Ready to edit your first video?</h2>
+  <p>Free forever. No account needed. Works in any modern browser.</p>
+  <a href="editor.html" class="btn-primary btn-lg">Open the Editor</a>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <a class="nav-logo" href="index.html">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0f172a"/><polygon points="12,8 26,16 12,24" fill="#38bdf8"/></svg>
+        VidEdit
+      </a>
+      <p>A free, open-source browser video editor. Built with privacy first.</p>
+    </div>
+    <div class="footer-links">
+      <div>
+        <strong>Product</strong>
+        <a href="editor.html">Editor</a>
+        <a href="pages/about.html">About</a>
+        <a href="pages/faq.html">FAQ</a>
+      </div>
+      <div>
+        <strong>Legal</strong>
+        <a href="pages/privacy.html">Privacy Policy</a>
+        <a href="pages/terms.html">Terms of Use</a>
+        <a href="pages/cookies.html">Cookie Policy</a>
+      </div>
+      <div>
+        <strong>Community</strong>
+        <a href="pages/donate.html">Donate</a>
+        <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+        <a href="pages/contact.html">Contact</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 VidEdit. Open-source under MIT License.</span>
+    <span>Made with ❤️ for privacy</span>
+  </div>
+</footer>
+
+<script>
+document.getElementById('menuToggle').addEventListener('click', () => {
+  document.getElementById('mobileMenu').classList.toggle('open');
+});
+</script>
+</body>
+</html>
