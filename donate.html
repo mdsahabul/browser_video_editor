@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Support VidEdit — Donate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><polygon points='12,8 26,16 12,24' fill='%2338bdf8'/></svg>">
-<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="main.css">
 <style>
   .platform-card {
     background: var(--bg-card);
@@ -60,12 +60,12 @@
     VidEdit
   </a>
   <ul class="nav-links">
-    <li><a href="../index.html">Home</a></li>
-    <li><a href="../editor.html">Editor</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="editor.html">Editor</a></li>
     <li><a href="about.html">About</a></li>
     <li><a href="donate.html" class="active">Donate</a></li>
   </ul>
-  <a href="../editor.html" class="btn-primary nav-cta">Open Editor</a>
+  <a href="editor.html" class="btn-primary nav-cta">Open Editor</a>
 </nav>
 
 <div class="page-hero">
@@ -92,47 +92,15 @@
       <div class="platform-icon">💙</div>
       <h3>PayPal</h3>
       <p>One-time or recurring donations via PayPal</p>
-      <a href="https://paypal.me/yourusername" target="_blank" rel="noopener" class="btn-primary" id="paypalBtn">Donate via PayPal</a>
+      <a href="https://link.payoneer.com/Token?t=1E8B039D8ACB4E13B81DF46AC55D3F3D&src=pl" target="_blank" rel="noopener" class="btn-primary" id="paypalBtn">Donate via PayPal</a>
     </div>
-    <div class="platform-card">
-      <div class="platform-icon">☕</div>
-      <h3>Buy Me a Coffee</h3>
-      <p>Quick one-time donations, no account needed</p>
-      <a href="https://buymeacoffee.com/yourusername" target="_blank" rel="noopener" class="btn-primary" id="bmcBtn">Buy a Coffee</a>
-    </div>
-    <div class="platform-card">
-      <div class="platform-icon">🟠</div>
-      <h3>Ko-fi</h3>
-      <p>Support with a coffee or monthly membership</p>
-      <a href="https://ko-fi.com/yourusername" target="_blank" rel="noopener" class="btn-primary" id="kofiBtn">Support on Ko-fi</a>
-    </div>
+
     <div class="platform-card">
       <div class="platform-icon">🐙</div>
       <h3>GitHub Sponsors</h3>
       <p>Sponsor directly through GitHub</p>
-      <a href="https://github.com/sponsors/yourusername" target="_blank" rel="noopener" class="btn-primary" id="sponsorBtn">GitHub Sponsors</a>
+      <a href="https://github.com/sponsors/mdsahabul" target="_blank" rel="noopener" class="btn-primary" id="sponsorBtn">GitHub Sponsors</a>
     </div>
-  </div>
-
-  <h2>Cryptocurrency</h2>
-  <p>Prefer crypto? We accept Bitcoin and Ethereum.</p>
-
-  <div class="crypto-box">
-    <span style="font-size:1.5rem">₿</span>
-    <div>
-      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.25rem">Bitcoin (BTC)</div>
-      <div class="addr" id="btcAddr">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
-    </div>
-    <button class="copy-btn" onclick="copyAddr('btcAddr')">Copy</button>
-  </div>
-
-  <div class="crypto-box">
-    <span style="font-size:1.5rem">Ξ</span>
-    <div>
-      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.25rem">Ethereum (ETH)</div>
-      <div class="addr">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</div>
-    </div>
-    <button class="copy-btn" onclick="navigator.clipboard.writeText('0x71C7656EC7ab88b098defB751B7401B5f6d8976F').then(()=>toast('ETH address copied!','success'))">Copy</button>
   </div>
 
   <h2>Other ways to support</h2>
