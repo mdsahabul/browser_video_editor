@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — VidEdit</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><polygon points='12,8 26,16 12,24' fill='%2338bdf8'/></svg>">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+  .admin-section { display: none; }
+  .admin-section.active { display: block; }
+  .login-box { max-width: 380px; margin: 6rem auto; padding: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-xl); }
+  .login-box h1 { font-size: 1.4rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; }
+  .color-picker-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .color-picker-row label { font-size: 0.85rem; color: var(--text-secondary); flex: 1; }
+  .color-picker-row input[type="color"] { width: 44px; height: 32px; border: none; border-radius: 4px; cursor: pointer; padding: 0; }
+  .icon-btn { background: none; border: 1px solid var(--border); color: var(--text-secondary); border-radius: var(--radius-sm); padding: 0.3rem 0.6rem; cursor: pointer; font-size: 0.8rem; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+  .setting-row label { font-size: 0.9rem; }
+  .setting-row span { font-size: 0.8rem; color: var(--text-muted); }
+  .toggle { position: relative; width: 40px; height: 22px; cursor: pointer; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--border-light); border-radius: 22px; transition: 0.2s; }
+  .toggle-slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
+  .nav-notice { background: rgba(245,158,11,0.1); border: 1px solid #92400e; color: var(--warning); padding: 0.6rem 1.25rem; text-align: center; font-size: 0.82rem; }
+</style>
+</head>
+<body>
+<div id="loginScreen">
+  <nav class="nav">
+    <a class="nav-logo" href="../index.html">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0f172a"/><polygon points="12,8 26,16 12,24" fill="#38bdf8"/></svg>
+      VidEdit Admin
+    </a>
+  </nav>
+  <div class="login-box">
+    <h1>🔐 Admin Login</h1>
+    <div class="alert-warning alert" style="margin-bottom:1rem;font-size:0.82rem">This panel is for site administrators only.</div>
+    <div class="form-group"><label>Username</label><input type="text" id="loginUser" placeholder="admin"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+    <button class="btn-primary" style="width:100%;margin-top:0.5rem" id="loginBtn">Login</button>
+    <p style="font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:1rem">Default: admin / videdit2025</p>
+  </div>
+</div>
+
+<div id="adminApp" style="display:none">
+  <div class="nav-notice">⚠️ Admin Mode — Changes are saved to localStorage and reflected on the site.</div>
+  <nav class="nav">
+    <a class="nav-logo" href="../index.html">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0f172a"/><polygon points="12,8 26,16 12,24" fill="#38bdf8"/></svg>
+      VidEdit Admin
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html" target="_blank">← View Site</a></li>
+    </ul>
+    <button class="btn-ghost" id="logoutBtn" style="margin-left:auto">Logout</button>
+  </nav>
+
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <h3>Dashboard</h3>
+      <a class="admin-link active" data-section="overview">📊 Overview</a>
+      <h3>Site Settings</h3>
+      <a class="admin-link" data-section="general">⚙️ General</a>
+      <a class="admin-link" data-section="appearance">🎨 Appearance</a>
+      <a class="admin-link" data-section="features">🔧 Features</a>
+      <a class="admin-link" data-section="seo">🔍 SEO</a>
+      <h3>Content</h3>
+      <a class="admin-link" data-section="pages">📄 Pages & Text</a>
+      <a class="admin-link" data-section="donate">💰 Donation</a>
+      <a class="admin-link" data-section="notices">📢 Notices</a>
+      <h3>Security</h3>
+      <a class="admin-link" data-section="auth">🔐 Admin Auth</a>
+    </div>
+
+    <div class="admin-main">
+
+      <!-- OVERVIEW -->
+      <div class="admin-section active" id="section-overview">
+        <div class="admin-title">Dashboard Overview</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Site Status</div><div class="stat-value" style="font-size:1.2rem;color:var(--success)">● Live</div></div>
+          <div class="stat-card"><div class="stat-label">Storage Type</div><div class="stat-value" style="font-size:1.2rem">Client</div></div>
+          <div class="stat-card"><div class="stat-label">Version</div><div class="stat-value" style="font-size:1.2rem">1.0.0</div></div>
+          <div class="stat-card"><div class="stat-label">Editor Engine</div><div class="stat-value" style="font-size:1.2rem">Browser</div></div>
+        </div>
+        <div class="admin-card">
+          <h3>Quick Actions</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem">
+            <a href="../index.html" target="_blank" class="btn-ghost">🌐 View Homepage</a>
+            <a href="../editor.html" target="_blank" class="btn-ghost">🎬 Open Editor</a>
+            <a href="../pages/donate.html" target="_blank" class="btn-ghost">💰 Donation Page</a>
+            <button class="btn-ghost" onclick="exportSettings()">⬇ Export Settings JSON</button>
+            <button class="btn-ghost" onclick="importSettingsFile()">⬆ Import Settings JSON</button>
+          </div>
+          <input type="file" id="importFile" accept=".json" style="display:none">
+        </div>
+        <div class="admin-card">
+          <h3>System Info</h3>
+          <table class="admin-table">
+            <tr><td style="color:var(--text-secondary)">Browser</td><td id="sysBrowser"></td></tr>
+            <tr><td style="color:var(--text-secondary)">Screen</td><td id="sysScreen"></td></tr>
+            <tr><td style="color:var(--text-secondary)">localStorage Used</td><td id="sysStorage"></td></tr>
+            <tr><td style="color:var(--text-secondary)">MediaRecorder Support</td><td id="sysMR"></td></tr>
+            <tr><td style="color:var(--text-secondary)">Canvas Capture Support</td><td id="sysCanvas"></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- GENERAL -->
+      <div class="admin-section" id="section-general">
+        <div class="admin-title">General Settings</div>
+        <div class="admin-card">
+          <h3>Site Identity</h3>
+          <div class="form-group"><label>Site Name</label><input type="text" id="siteName" placeholder="VidEdit"></div>
+          <div class="form-group"><label>Tagline</label><input type="text" id="siteTagline" placeholder="Free Browser Video Editor"></div>
+          <div class="form-group"><label>Contact Email</label><input type="email" id="contactEmail" placeholder="your@email.com"></div>
+          <div class="form-group"><label>GitHub Repository URL</label><input type="url" id="githubUrl" placeholder="https://github.com/yourusername/videdit"></div>
+          <div class="form-group"><label>Site URL</label><input type="url" id="siteUrl" placeholder="https://videdit.vercel.app"></div>
+          <button class="btn-primary" onclick="saveSection('general')">Save General Settings</button>
+        </div>
+        <div class="admin-card">
+          <h3>Footer</h3>
+          <div class="form-group"><label>Footer Copyright Text</label><input type="text" id="footerCopyright" placeholder="© 2025 VidEdit. Open-source under MIT License."></div>
+          <div class="form-group"><label>Footer Tagline</label><input type="text" id="footerTagline" placeholder="Made with ❤️ for privacy"></div>
+          <button class="btn-primary" onclick="saveSection('footer')">Save Footer</button>
+        </div>
+      </div>
+
+      <!-- APPEARANCE -->
+      <div class="admin-section" id="section-appearance">
+        <div class="admin-title">Appearance</div>
+        <div class="admin-card">
+          <h3>Brand Colors</h3>
+          <div class="color-picker-row"><label>Accent Color</label><input type="color" id="colorAccent" value="#38bdf8"><span id="colorAccentHex" style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono)">#38bdf8</span></div>
+          <div class="color-picker-row"><label>Background Base</label><input type="color" id="colorBg" value="#0a0f1e"><span id="colorBgHex" style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono)">#0a0f1e</span></div>
+          <div class="color-picker-row"><label>Surface Color</label><input type="color" id="colorSurface" value="#111827"><span id="colorSurfaceHex" style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono)">#111827</span></div>
+          <div class="color-picker-row"><label>Text Primary</label><input type="color" id="colorText" value="#f0f6ff"><span id="colorTextHex" style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono)">#f0f6ff</span></div>
+          <div style="margin-top:1rem;display:flex;gap:0.5rem">
+            <button class="btn-primary" onclick="saveSection('colors')">Apply Colors</button>
+            <button class="btn-ghost" onclick="resetColors()">Reset to Default</button>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.5rem">Note: color changes require updating <code>main.css</code> :root variables for production. This panel saves preferences to localStorage for preview.</p>
+        </div>
+        <div class="admin-card">
+          <h3>Custom CSS</h3>
+          <div class="form-group"><label>Additional CSS (injected into &lt;head&gt; via script)</label><textarea id="customCss" placeholder="/* your custom CSS here */"></textarea></div>
+          <button class="btn-primary" onclick="saveSection('customCss')">Save Custom CSS</button>
+        </div>
+      </div>
+
+      <!-- FEATURES -->
+      <div class="admin-section" id="section-features">
+        <div class="admin-title">Feature Toggles</div>
+        <div class="admin-card">
+          <h3>Editor Features</h3>
+          <div class="setting-row"><div><label>Text Overlays</label><br><span>Allow adding text on video</span></div><label class="toggle"><input type="checkbox" id="feat-text" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div><label>Color Filters</label><br><span>Brightness/contrast/presets</span></div><label class="toggle"><input type="checkbox" id="feat-filters" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div><label>Speed Control</label><br><span>Playback rate adjustment</span></div><label class="toggle"><input type="checkbox" id="feat-speed" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div><label>Audio Controls</label><br><span>Volume, mute, fade</span></div><label class="toggle"><input type="checkbox" id="feat-audio" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div><label>Crop & Ratio</label><br><span>Aspect ratio presets</span></div><label class="toggle"><input type="checkbox" id="feat-crop" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div><label>Snapshot</label><br><span>Export single frame as PNG</span></div><label class="toggle"><input type="checkbox" id="feat-snapshot" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div><label>Export Button</label><br><span>Video export functionality</span></div><label class="toggle"><input type="checkbox" id="feat-export" checked><span class="toggle-slider"></span></label></div>
+          <button class="btn-primary" style="margin-top:1rem" onclick="saveSection('features')">Save Feature Settings</button>
+        </div>
+        <div class="admin-card">
+          <h3>Site Features</h3>
+          <div class="setting-row"><div><label>Donation Page</label><br><span>Show donate link in nav</span></div><label class="toggle"><input type="checkbox" id="feat-donate" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div><label>FAQ Page</label><br><span>Show FAQ in nav</span></div><label class="toggle"><input type="checkbox" id="feat-faq" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div><label>GitHub Link</label><br><span>Show GitHub in footer</span></div><label class="toggle"><input type="checkbox" id="feat-github" checked><span class="toggle-slider"></span></label></div>
+          <button class="btn-primary" style="margin-top:1rem" onclick="saveSection('siteFeatures')">Save Site Features</button>
+        </div>
+      </div>
+
+      <!-- SEO -->
+      <div class="admin-section" id="section-seo">
+        <div class="admin-title">SEO Settings</div>
+        <div class="admin-card">
+          <h3>Meta Tags</h3>
+          <div class="form-group"><label>Meta Title (homepage)</label><input type="text" id="metaTitle" placeholder="VidEdit — Free Browser Video Editor"></div>
+          <div class="form-group"><label>Meta Description</label><textarea id="metaDesc" style="min-height:80px" placeholder="Edit any video directly in your browser..."></textarea></div>
+          <div class="form-group"><label>Meta Keywords</label><input type="text" id="metaKeywords" placeholder="video editor, browser, free, privacy, no upload"></div>
+          <div class="form-group"><label>OG Image URL</label><input type="url" id="ogImage" placeholder="https://..."></div>
+          <button class="btn-primary" onclick="saveSection('seo')">Save SEO Settings</button>
+        </div>
+        <div class="admin-card">
+          <h3>Analytics / Scripts</h3>
+          <div class="form-group"><label>Google Analytics ID (optional)</label><input type="text" id="gaId" placeholder="G-XXXXXXXXXX"></div>
+          <div class="form-group"><label>Custom Header Scripts</label><textarea id="customHead" placeholder="<!-- paste scripts here -->"></textarea></div>
+          <button class="btn-primary" onclick="saveSection('analytics')">Save Analytics</button>
+        </div>
+      </div>
+
+      <!-- PAGES -->
+      <div class="admin-section" id="section-pages">
+        <div class="admin-title">Pages & Content</div>
+        <div class="admin-card">
+          <h3>Homepage Hero</h3>
+          <div class="form-group"><label>Hero Headline</label><input type="text" id="heroTitle" placeholder="Edit Videos Right in Your Browser"></div>
+          <div class="form-group"><label>Hero Subtitle</label><textarea id="heroSub" style="min-height:80px" placeholder="Trim, cut, crop..."></textarea></div>
+          <div class="form-group"><label>CTA Button Text</label><input type="text" id="ctaText" placeholder="Start Editing Free"></div>
+          <button class="btn-primary" onclick="saveSection('hero')">Save Hero Content</button>
+        </div>
+        <div class="admin-card">
+          <h3>About Page Content</h3>
+          <div class="form-group"><label>About Introduction</label><textarea id="aboutContent" style="min-height:120px" placeholder="VidEdit is a free..."></textarea></div>
+          <button class="btn-primary" onclick="saveSection('about')">Save About Content</button>
+        </div>
+      </div>
+
+      <!-- DONATE -->
+      <div class="admin-section" id="section-donate">
+        <div class="admin-title">Donation Settings</div>
+        <div class="admin-card">
+          <h3>Payment Links</h3>
+          <div class="form-group"><label>PayPal.me Link</label><input type="url" id="paypalLink" placeholder="https://paypal.me/yourusername"></div>
+          <div class="form-group"><label>Buy Me a Coffee Link</label><input type="url" id="bmcLink" placeholder="https://buymeacoffee.com/yourusername"></div>
+          <div class="form-group"><label>Ko-fi Link</label><input type="url" id="kofiLink" placeholder="https://ko-fi.com/yourusername"></div>
+          <div class="form-group"><label>GitHub Sponsors Link</label><input type="url" id="sponsorLink" placeholder="https://github.com/sponsors/yourusername"></div>
+          <div class="form-group"><label>Bitcoin Address</label><input type="text" id="btcAddress" placeholder="bc1q..."></div>
+          <button class="btn-primary" onclick="saveSection('donate')">Save Donation Links</button>
+        </div>
+        <div class="admin-card">
+          <h3>Donation Message</h3>
+          <div class="form-group"><label>Message shown on donate page</label><textarea id="donateMsg" style="min-height:100px" placeholder="VidEdit is completely free..."></textarea></div>
+          <button class="btn-primary" onclick="saveSection('donateMsg')">Save Message</button>
+        </div>
+      </div>
+
+      <!-- NOTICES -->
+      <div class="admin-section" id="section-notices">
+        <div class="admin-title">Site Notices & Banners</div>
+        <div class="admin-card">
+          <h3>Top Banner</h3>
+          <div class="setting-row"><label>Show Top Banner</label><label class="toggle"><input type="checkbox" id="bannerEnabled"><span class="toggle-slider"></span></label></div>
+          <div class="form-group" style="margin-top:0.75rem"><label>Banner Message</label><input type="text" id="bannerText" placeholder="🎉 VidEdit 2.0 is here!"></div>
+          <div class="form-group">
+            <label>Banner Type</label>
+            <select id="bannerType">
+              <option value="info">Info (blue)</option>
+              <option value="success">Success (green)</option>
+              <option value="warning">Warning (orange)</option>
+              <option value="danger">Alert (red)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Banner Link (optional)</label><input type="url" id="bannerLink" placeholder="https://..."></div>
+          <button class="btn-primary" onclick="saveSection('banner')">Save Banner</button>
+        </div>
+        <div class="admin-card">
+          <h3>Maintenance Mode</h3>
+          <div class="setting-row"><div><label>Maintenance Mode</label><br><span>Shows a maintenance notice to visitors</span></div><label class="toggle"><input type="checkbox" id="maintenanceMode"><span class="toggle-slider"></span></label></div>
+          <div class="form-group" style="margin-top:0.75rem"><label>Maintenance Message</label><input type="text" id="maintenanceMsg" placeholder="We'll be back shortly..."></div>
+          <button class="btn-primary" onclick="saveSection('maintenance')">Save Maintenance Settings</button>
+        </div>
+      </div>
+
+      <!-- AUTH -->
+      <div class="admin-section" id="section-auth">
+        <div class="admin-title">Admin Authentication</div>
+        <div class="admin-card">
+          <h3>Change Admin Credentials</h3>
+          <div class="alert-warning alert" style="margin-bottom:1rem;font-size:0.82rem">⚠️ Credentials are stored in localStorage. For production, use server-side authentication.</div>
+          <div class="form-group"><label>Current Password</label><input type="password" id="currentPass" placeholder="Current password"></div>
+          <div class="form-group"><label>New Username</label><input type="text" id="newUser" placeholder="New username"></div>
+          <div class="form-group"><label>New Password</label><input type="password" id="newPass" placeholder="New password (min 8 chars)"></div>
+          <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPass" placeholder="Confirm new password"></div>
+          <button class="btn-primary" onclick="changeCredentials()">Update Credentials</button>
+        </div>
+      </div>
+
+    </div><!-- end admin-main -->
+  </div><!-- end admin-layout -->
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ===== AUTH =====
+const DEFAULT_USER = 'admin', DEFAULT_PASS = 'videdit2025';
+function getCredentials() {
+  const creds = localStorage.getItem('videdit_admin_creds');
+  return creds ? JSON.parse(creds) : { user: DEFAULT_USER, pass: DEFAULT_PASS };
+}
+
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+[document.getElementById('loginUser'), document.getElementById('loginPass')].forEach(el => {
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+});
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value;
+  const p = document.getElementById('loginPass').value;
+  const creds = getCredentials();
+  if (u === creds.user && p === creds.pass) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    initAdmin();
+    toast('Welcome to Admin Panel', 'success');
+  } else {
+    toast('Invalid credentials.', 'error');
+  }
+}
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  document.getElementById('adminApp').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'block';
+  document.getElementById('loginPass').value = '';
+});
+
+// ===== NAV =====
+document.querySelectorAll('.admin-link').forEach(link => {
+  link.addEventListener('click', () => {
+    const section = link.dataset.section;
+    document.querySelectorAll('.admin-link').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+    link.classList.add('active');
+    document.getElementById('section-' + section)?.classList.add('active');
+  });
+});
+
+// ===== INIT =====
+function initAdmin() {
+  loadSavedSettings();
+  // System info
+  document.getElementById('sysBrowser').textContent = navigator.userAgent.split(')')[0].split('(')[1] || navigator.userAgent;
+  document.getElementById('sysScreen').textContent = `${screen.width}×${screen.height}`;
+  try {
+    let total = 0;
+    for (let k in localStorage) { if (localStorage.hasOwnProperty(k)) total += (localStorage[k].length + k.length) * 2; }
+    document.getElementById('sysStorage').textContent = (total / 1024).toFixed(2) + ' KB';
+  } catch(e) { document.getElementById('sysStorage').textContent = 'N/A'; }
+  document.getElementById('sysMR').textContent = typeof MediaRecorder !== 'undefined' ? '✅ Supported' : '❌ Not supported';
+  try { document.createElement('canvas').captureStream; document.getElementById('sysCanvas').textContent = '✅ Supported'; }
+  catch(e) { document.getElementById('sysCanvas').textContent = '❌ Not supported'; }
+
+  // Color pickers live preview
+  ['Accent','Bg','Surface','Text'].forEach(n => {
+    const el = document.getElementById('color' + n);
+    const hex = document.getElementById('color' + n + 'Hex');
+    el.addEventListener('input', () => { hex.textContent = el.value; });
+  });
+}
+
+function loadSavedSettings() {
+  const settings = JSON.parse(localStorage.getItem('videdit_settings') || '{}');
+  const fields = ['siteName','siteTagline','contactEmail','githubUrl','siteUrl',
+    'footerCopyright','footerTagline','metaTitle','metaDesc','metaKeywords','ogImage',
+    'gaId','customHead','heroTitle','heroSub','ctaText','aboutContent','paypalLink',
+    'bmcLink','kofiLink','sponsorLink','btcAddress','donateMsg','bannerText','bannerLink','maintenanceMsg','customCss'];
+  fields.forEach(f => { if (settings[f] && document.getElementById(f)) document.getElementById(f).value = settings[f]; });
+  const bools = ['feat-text','feat-filters','feat-speed','feat-audio','feat-crop','feat-snapshot',
+    'feat-export','feat-donate','feat-faq','feat-github','bannerEnabled','maintenanceMode'];
+  bools.forEach(f => {
+    const el = document.getElementById(f);
+    if (el) el.checked = settings[f] !== undefined ? settings[f] : true;
+  });
+  if (settings.bannerType && document.getElementById('bannerType')) document.getElementById('bannerType').value = settings.bannerType;
+}
+
+function saveSection(section) {
+  const settings = JSON.parse(localStorage.getItem('videdit_settings') || '{}');
+  const sectionFields = {
+    general: ['siteName','siteTagline','contactEmail','githubUrl','siteUrl'],
+    footer: ['footerCopyright','footerTagline'],
+    colors: ['colorAccent','colorBg','colorSurface','colorText'],
+    customCss: ['customCss'],
+    features: ['feat-text','feat-filters','feat-speed','feat-audio','feat-crop','feat-snapshot','feat-export'],
+    siteFeatures: ['feat-donate','feat-faq','feat-github'],
+    seo: ['metaTitle','metaDesc','metaKeywords','ogImage'],
+    analytics: ['gaId','customHead'],
+    hero: ['heroTitle','heroSub','ctaText'],
+    about: ['aboutContent'],
+    donate: ['paypalLink','bmcLink','kofiLink','sponsorLink','btcAddress'],
+    donateMsg: ['donateMsg'],
+    banner: ['bannerEnabled','bannerText','bannerType','bannerLink'],
+    maintenance: ['maintenanceMode','maintenanceMsg'],
+  };
+  const fields = sectionFields[section] || [];
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    if (!el) return;
+    settings[f] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  localStorage.setItem('videdit_settings', JSON.stringify(settings));
+  toast('Settings saved!', 'success');
+}
+
+function changeCredentials() {
+  const current = document.getElementById('currentPass').value;
+  const creds = getCredentials();
+  if (current !== creds.pass) { toast('Current password is incorrect.', 'error'); return; }
+  const newUser = document.getElementById('newUser').value.trim();
+  const newPass = document.getElementById('newPass').value;
+  const confirm = document.getElementById('confirmPass').value;
+  if (!newUser || newUser.length < 3) { toast('Username must be at least 3 characters.', 'error'); return; }
+  if (newPass.length < 8) { toast('Password must be at least 8 characters.', 'error'); return; }
+  if (newPass !== confirm) { toast('Passwords do not match.', 'error'); return; }
+  localStorage.setItem('videdit_admin_creds', JSON.stringify({ user: newUser, pass: newPass }));
+  toast('Credentials updated successfully!', 'success');
+  document.getElementById('currentPass').value = '';
+  document.getElementById('newUser').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
+}
+
+function resetColors() {
+  document.getElementById('colorAccent').value = '#38bdf8';
+  document.getElementById('colorBg').value = '#0a0f1e';
+  document.getElementById('colorSurface').value = '#111827';
+  document.getElementById('colorText').value = '#f0f6ff';
+  ['Accent','Bg','Surface','Text'].forEach(n => {
+    document.getElementById('color' + n + 'Hex').textContent = document.getElementById('color' + n).value;
+  });
+  toast('Colors reset to defaults.', 'info');
+}
+
+function exportSettings() {
+  const settings = localStorage.getItem('videdit_settings') || '{}';
+  const blob = new Blob([settings], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'videdit-settings.json'; a.click();
+  toast('Settings exported.', 'success');
+}
+
+function importSettingsFile() {
+  document.getElementById('importFile').click();
+  document.getElementById('importFile').onchange = function() {
+    const f = this.files[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        JSON.parse(e.target.result);
+        localStorage.setItem('videdit_settings', e.target.result);
+        loadSavedSettings();
+        toast('Settings imported!', 'success');
+      } catch { toast('Invalid JSON file.', 'error'); }
+    };
+    reader.readAsText(f);
+  };
+}
+
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+</script>
+</body>
+</html>

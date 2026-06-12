@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — VidEdit</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><polygon points='12,8 26,16 12,24' fill='%2338bdf8'/></svg>">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0f172a"/><polygon points="12,8 26,16 12,24" fill="#38bdf8"/></svg>
+    VidEdit
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../editor.html">Editor</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="donate.html">Donate</a></li>
+  </ul>
+  <a href="../editor.html" class="btn-primary nav-cta">Open Editor</a>
+</nav>
+
+<div class="page-hero">
+  <h1>🔒 Privacy Policy</h1>
+  <p>Last updated: January 1, 2025 · Your privacy is at the core of everything we build.</p>
+</div>
+
+<div class="page-content">
+  <div class="alert-success alert">
+    <strong>TL;DR:</strong> VidEdit does not collect, store, or transmit your videos or personal data. Everything runs in your browser.
+  </div>
+
+  <h2>1. Who We Are</h2>
+  <p>VidEdit is a free, open-source browser-based video editor. We do not operate servers that process video files. The application runs entirely within your web browser using standard Web APIs including the Canvas API, MediaRecorder API, and File API.</p>
+
+  <h2>2. Data We Do Not Collect</h2>
+  <p>VidEdit does not collect the following data:</p>
+  <ul>
+    <li>Your video files — they never leave your device</li>
+    <li>Personal identifying information (name, email, address)</li>
+    <li>Browsing history or usage patterns</li>
+    <li>Location data</li>
+    <li>Device identifiers or fingerprints</li>
+    <li>Cookies used for tracking</li>
+  </ul>
+
+  <h2>3. Local Storage</h2>
+  <p>VidEdit uses your browser's <strong>localStorage</strong> solely to save the Admin Panel settings you configure. This data stays on your device and is never transmitted to any server. You can clear it at any time by clearing your browser's site data for this domain.</p>
+
+  <h2>4. Video Processing</h2>
+  <p>All video editing operations — trimming, filtering, text overlays, speed adjustments, and exporting — occur locally in your browser using the Web APIs. No video data is uploaded to any server, cloud service, or third party. Your video files are read directly from your device's filesystem via the browser File API and processed in memory.</p>
+
+  <h2>5. Exported Files</h2>
+  <p>When you export an edited video, the output file is generated in your browser using the Canvas API and MediaRecorder API. The file is offered as a download via a local object URL that exists only in your browser session. After download, no copy of your video exists on our end.</p>
+
+  <h2>6. Third-Party Services</h2>
+  <p>VidEdit hosted on GitHub Pages or Vercel may load only the HTML, CSS, and JavaScript files that make up the application. These platforms may log basic server access data (IP address, page requested, timestamp) as part of their standard hosting operations. Please review <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank">GitHub's Privacy Statement</a> and <a href="https://vercel.com/legal/privacy-policy" target="_blank">Vercel's Privacy Policy</a> for details.</p>
+  <p>If you use the optional donation links on our donate page, those links direct you to third-party payment platforms (PayPal, Buy Me a Coffee, Ko-fi, etc.) which have their own privacy policies. We do not receive or store any payment information.</p>
+
+  <h2>7. Analytics</h2>
+  <p>By default, VidEdit does not use any analytics tracking. If the site administrator optionally enables Google Analytics through the Admin Panel, the Google Analytics service may collect anonymized usage data. This is at the discretion of whoever deploys the application. You can check whether analytics is active by looking for a <code>G-XXXXXXXX</code> tracking script in the page source.</p>
+
+  <h2>8. Children's Privacy</h2>
+  <p>VidEdit is a general-purpose tool with no age-specific restrictions. We do not knowingly collect any information from children under 13 (or the applicable age in your jurisdiction) because we do not collect personal information from anyone.</p>
+
+  <h2>9. Your Rights</h2>
+  <p>Because we do not collect personal data, there is no data to access, correct, or delete. You can clear any locally stored settings by clearing your browser's localStorage for this site. If you have questions, contact us using the details below.</p>
+
+  <h2>10. Open Source</h2>
+  <p>VidEdit is open source. You can review the full source code on <a href="https://github.com/" target="_blank">GitHub</a> to verify exactly what data is handled and how. We believe transparency and auditable code is the best form of privacy protection.</p>
+
+  <h2>11. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. Changes will be reflected by the "Last updated" date at the top of this page. Continued use of VidEdit after changes indicates acceptance of the updated policy. Given that we collect no personal data, changes are unlikely to affect your interests materially.</p>
+
+  <h2>12. Contact</h2>
+  <p>If you have questions or concerns about this Privacy Policy, please contact us:</p>
+  <ul>
+    <li>Email: <a href="mailto:admin@videdit.app">admin@videdit.app</a></li>
+    <li>GitHub Issues: <a href="https://github.com/" target="_blank">github.com/yourusername/videdit</a></li>
+  </ul>
+
+  <div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+    <p style="font-size:0.85rem;color:var(--text-muted)">Related: <a href="terms.html">Terms of Use</a> · <a href="cookies.html">Cookie Policy</a> · <a href="../index.html">Back to Home</a></p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom" style="max-width:1100px;margin:0 auto;padding:1.5rem 2rem 0">
+    <span>© 2025 VidEdit. Open-source under MIT License.</span>
+    <a href="../index.html">Back to Home</a>
+  </div>
+</footer>
+</body>
+</html>

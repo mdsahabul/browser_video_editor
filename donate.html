@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support VidEdit — Donate</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><polygon points='12,8 26,16 12,24' fill='%2338bdf8'/></svg>">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+  .platform-card {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .platform-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .platform-icon { font-size: 2.5rem; }
+  .platform-card h3 { font-size: 1.05rem; font-weight: 700; }
+  .platform-card p { font-size: 0.82rem; color: var(--text-secondary); }
+  .platform-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin: 2rem 0; }
+  .crypto-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .crypto-box .addr { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-secondary); word-break: break-all; flex: 1; }
+  .copy-btn {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: 0.35rem 0.65rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    transition: all var(--transition);
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 2rem 0; }
+  .impact-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; }
+  .impact-card .impact-amount { font-size: 1.4rem; font-weight: 800; color: var(--accent); margin-bottom: 0.25rem; }
+  .impact-card .impact-desc { font-size: 0.85rem; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0f172a"/><polygon points="12,8 26,16 12,24" fill="#38bdf8"/></svg>
+    VidEdit
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../editor.html">Editor</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="donate.html" class="active">Donate</a></li>
+  </ul>
+  <a href="../editor.html" class="btn-primary nav-cta">Open Editor</a>
+</nav>
+
+<div class="page-hero">
+  <h1>❤️ Support VidEdit</h1>
+  <p>VidEdit is free, open-source, and privacy-first. Your support keeps it that way.</p>
+</div>
+
+<div class="page-content" style="max-width:860px">
+  <div class="alert-info alert" id="donateMsg">
+    VidEdit is completely free with no ads, no paywalls, and no data collection. Building and maintaining this takes real time and effort. If VidEdit has saved you money or made your workflow easier, consider supporting the project with a small donation. Every dollar helps cover hosting, development time, and keeps the project alive.
+  </div>
+
+  <h2>What your support covers</h2>
+  <div class="impact-grid">
+    <div class="impact-card"><div class="impact-amount">$1</div><div class="impact-desc">Pays for a month of domain registration</div></div>
+    <div class="impact-card"><div class="impact-amount">$5</div><div class="impact-desc">Covers a cup of coffee to fuel development</div></div>
+    <div class="impact-card"><div class="impact-amount">$10</div><div class="impact-desc">Funds a new feature or bug fix sprint</div></div>
+    <div class="impact-card"><div class="impact-amount">$25+</div><div class="impact-desc">Sustains ongoing maintenance and improvements</div></div>
+  </div>
+
+  <h2>Choose your platform</h2>
+  <div class="platform-grid">
+    <div class="platform-card">
+      <div class="platform-icon">💙</div>
+      <h3>PayPal</h3>
+      <p>One-time or recurring donations via PayPal</p>
+      <a href="https://paypal.me/yourusername" target="_blank" rel="noopener" class="btn-primary" id="paypalBtn">Donate via PayPal</a>
+    </div>
+    <div class="platform-card">
+      <div class="platform-icon">☕</div>
+      <h3>Buy Me a Coffee</h3>
+      <p>Quick one-time donations, no account needed</p>
+      <a href="https://buymeacoffee.com/yourusername" target="_blank" rel="noopener" class="btn-primary" id="bmcBtn">Buy a Coffee</a>
+    </div>
+    <div class="platform-card">
+      <div class="platform-icon">🟠</div>
+      <h3>Ko-fi</h3>
+      <p>Support with a coffee or monthly membership</p>
+      <a href="https://ko-fi.com/yourusername" target="_blank" rel="noopener" class="btn-primary" id="kofiBtn">Support on Ko-fi</a>
+    </div>
+    <div class="platform-card">
+      <div class="platform-icon">🐙</div>
+      <h3>GitHub Sponsors</h3>
+      <p>Sponsor directly through GitHub</p>
+      <a href="https://github.com/sponsors/yourusername" target="_blank" rel="noopener" class="btn-primary" id="sponsorBtn">GitHub Sponsors</a>
+    </div>
+  </div>
+
+  <h2>Cryptocurrency</h2>
+  <p>Prefer crypto? We accept Bitcoin and Ethereum.</p>
+
+  <div class="crypto-box">
+    <span style="font-size:1.5rem">₿</span>
+    <div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.25rem">Bitcoin (BTC)</div>
+      <div class="addr" id="btcAddr">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+    </div>
+    <button class="copy-btn" onclick="copyAddr('btcAddr')">Copy</button>
+  </div>
+
+  <div class="crypto-box">
+    <span style="font-size:1.5rem">Ξ</span>
+    <div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.25rem">Ethereum (ETH)</div>
+      <div class="addr">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</div>
+    </div>
+    <button class="copy-btn" onclick="navigator.clipboard.writeText('0x71C7656EC7ab88b098defB751B7401B5f6d8976F').then(()=>toast('ETH address copied!','success'))">Copy</button>
+  </div>
+
+  <h2>Other ways to support</h2>
+  <ul>
+    <li><strong>Star us on GitHub</strong> — It helps more people discover the project</li>
+    <li><strong>Share with friends</strong> — Tell others who edit videos about VidEdit</li>
+    <li><strong>Contribute code</strong> — Bug fixes and features are always welcome via Pull Request</li>
+    <li><strong>Report bugs</strong> — Help us improve by opening GitHub Issues</li>
+    <li><strong>Write a review</strong> — Share your experience on social media</li>
+  </ul>
+
+  <div class="alert-success alert" style="margin-top:2rem">
+    💚 Thank you for supporting open-source, privacy-first software. Every contribution, big or small, makes a real difference.
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom" style="max-width:1100px;margin:0 auto;padding:1.5rem 2rem 0">
+    <span>© 2025 VidEdit. Open-source under MIT License.</span>
+    <a href="../index.html">Back to Home</a>
+  </div>
+</footer>
+
+<div id="toast-container"></div>
+<script>
+function copyAddr(id) {
+  const el = document.getElementById(id);
+  if (el) navigator.clipboard.writeText(el.textContent.trim()).then(() => toast('Address copied!', 'success'));
+}
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+// Load saved donate links from admin settings
+(function() {
+  const settings = JSON.parse(localStorage.getItem('videdit_settings') || '{}');
+  if (settings.paypalLink) document.getElementById('paypalBtn').href = settings.paypalLink;
+  if (settings.bmcLink) document.getElementById('bmcBtn').href = settings.bmcLink;
+  if (settings.kofiLink) document.getElementById('kofiBtn').href = settings.kofiLink;
+  if (settings.sponsorLink) document.getElementById('sponsorBtn').href = settings.sponsorLink;
+  if (settings.btcAddress) document.getElementById('btcAddr').textContent = settings.btcAddress;
+  if (settings.donateMsg) document.getElementById('donateMsg').textContent = settings.donateMsg;
+})();
+</script>
+</body>
+</html>

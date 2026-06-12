@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor — VidEdit</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><polygon points='12,8 26,16 12,24' fill='%2338bdf8'/></svg>">
+<link rel="stylesheet" href="assets/css/main.css">
+<style>
+  body { overflow: hidden; }
+  #drop-zone {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; background: var(--bg-base);
+    z-index: 100; gap: 1.5rem;
+  }
+  #drop-zone .dz-icon { font-size: 4rem; }
+  #drop-zone h2 { font-size: 1.8rem; font-weight: 700; }
+  #drop-zone p { color: var(--text-secondary); font-size: 0.95rem; }
+  #drop-zone.drag-over { background: rgba(56,189,248,0.05); border: 3px dashed var(--accent); }
+  #drop-zone .supported { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+  .editor-wrap { display: none; height: calc(100vh - 60px); }
+  .editor-wrap.visible { display: grid; }
+  #preview-canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+  #preview-video { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .timeline-track {
+    height: 60px; background: var(--bg-input); border-radius: 8px;
+    position: relative; overflow: hidden; cursor: pointer; border: 1px solid var(--border);
+  }
+  .timeline-thumb-strip {
+    height: 100%; display: flex; align-items: center;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    border-radius: 8px; opacity: 0.7;
+  }
+  .trim-handle {
+    position: absolute; top: 0; width: 12px; height: 100%;
+    background: var(--accent); cursor: ew-resize; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; z-index: 10;
+  }
+  .trim-handle-left { left: 0; border-radius: 4px 0 0 4px; }
+  .trim-handle-right { right: 0; border-radius: 0 4px 4px 0; }
+  .trim-region {
+    position: absolute; top: 0; height: 100%;
+    background: rgba(56,189,248,0.15); border-top: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent); pointer-events: none;
+  }
+  .playhead {
+    position: absolute; top: 0; width: 2px; height: 100%;
+    background: #f43f5e; z-index: 20; pointer-events: none; transition: left 0.05s linear;
+  }
+  .time-display { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); min-width: 100px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .color-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.5rem 0; }
+  .color-swatch {
+    width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: border-color var(--transition);
+  }
+  .color-swatch.selected { border-color: #fff; }
+  .overlay-text-item {
+    background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; margin-bottom: 0.5rem;
+    display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem;
+  }
+  .slider-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .slider-row label { font-size: 0.78rem; color: var(--text-secondary); min-width: 80px; }
+  .slider-row .val { font-size: 0.78rem; color: var(--accent); min-width: 36px; text-align: right; font-family: var(--font-mono); }
+  .filter-btn {
+    background: var(--bg-input); border: 1px solid var(--border);
+    color: var(--text-secondary); padding: 0.4rem 0.75rem; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 0.8rem; transition: all var(--transition);
+  }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .filter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; }
+  .export-modal { display: none; }
+  .export-modal.open { display: flex; }
+  #progress-container { display: none; }
+  .no-video-msg { color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem; }
+  .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .sidebar-tab {
+    flex: 1; padding: 0.65rem 0.5rem; background: none; border: none;
+    color: var(--text-secondary); font-size: 0.78rem; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all var(--transition); font-family: var(--font);
+  }
+  .sidebar-tab:hover { color: var(--text-primary); }
+  .sidebar-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .ratio-btn {
+    background: var(--bg-input); border: 1px solid var(--border);
+    color: var(--text-secondary); padding: 0.35rem 0.6rem; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 0.78rem; transition: all var(--transition);
+  }
+  .ratio-btn:hover, .ratio-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .ratio-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-logo" href="index.html">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0f172a"/><polygon points="12,8 26,16 12,24" fill="#38bdf8"/></svg>
+    VidEdit
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="editor.html" class="active">Editor</a></li>
+  </ul>
+  <div style="display:flex;gap:0.5rem;margin-left:auto;">
+    <button class="control-btn" id="newFileBtn" title="Open new file">📂 Open</button>
+    <button class="btn-primary" id="exportTopBtn" style="display:none">⬇ Export</button>
+  </div>
+</nav>
+
+<!-- DROP ZONE -->
+<div id="drop-zone">
+  <div class="dz-icon">🎬</div>
+  <h2>Drop Your Video Here</h2>
+  <p>Or click to browse from your device</p>
+  <input type="file" id="fileInput" accept="video/*" style="display:none" multiple>
+  <button class="btn-primary btn-lg" onclick="document.getElementById('fileInput').click()">Choose Video File</button>
+  <p class="supported">Supports MP4, WebM, MOV, AVI, MKV, and more · Any resolution · Any aspect ratio</p>
+  <div class="alert-info alert" style="max-width:420px;text-align:center;margin-top:0.5rem">
+    🔒 Your video never leaves your device. All processing happens locally in your browser.
+  </div>
+</div>
+
+<!-- EDITOR WORKSPACE -->
+<div class="editor-wrap editor-layout" id="editorWrap">
+  <!-- SIDEBAR -->
+  <div class="editor-sidebar">
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" data-panel="trim">✂️ Trim</button>
+      <button class="sidebar-tab" data-panel="filters">🎨 Filter</button>
+      <button class="sidebar-tab" data-panel="text">T Text</button>
+      <button class="sidebar-tab" data-panel="audio">🔊 Audio</button>
+      <button class="sidebar-tab" data-panel="crop">🔲 Crop</button>
+    </div>
+
+    <!-- TRIM PANEL -->
+    <div class="panel active sidebar-section" id="panel-trim">
+      <h4>Trim & Cut</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.75rem">
+        <div>
+          <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.25rem">Start</label>
+          <div id="trimStartDisplay" style="font-size:0.9rem;font-family:var(--font-mono);color:var(--accent)">0:00.000</div>
+        </div>
+        <div>
+          <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.25rem">End</label>
+          <div id="trimEndDisplay" style="font-size:0.9rem;font-family:var(--font-mono);color:var(--accent)">0:00.000</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button class="tool-btn" id="setInBtn">🎯 Set In Point</button>
+        <button class="tool-btn" id="setOutBtn">🎯 Set Out Point</button>
+        <button class="tool-btn" style="color:var(--danger)" id="resetTrimBtn">↩ Reset Trim</button>
+      </div>
+      <div style="margin-top:0.75rem;">
+        <h4>Speed</h4>
+        <div class="slider-row">
+          <label>Playback</label>
+          <input type="range" id="speedSlider" min="25" max="400" step="25" value="100">
+          <span class="val" id="speedVal">1×</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.25rem">
+          <button class="filter-btn" onclick="setSpeed(0.25)">0.25×</button>
+          <button class="filter-btn" onclick="setSpeed(0.5)">0.5×</button>
+          <button class="filter-btn active" onclick="setSpeed(1)">1×</button>
+          <button class="filter-btn" onclick="setSpeed(1.5)">1.5×</button>
+          <button class="filter-btn" onclick="setSpeed(2)">2×</button>
+          <button class="filter-btn" onclick="setSpeed(4)">4×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTERS PANEL -->
+    <div class="panel sidebar-section" id="panel-filters">
+      <h4>Color Adjustments</h4>
+      <div class="slider-row"><label>Brightness</label><input type="range" id="brightness" min="-100" max="100" step="1" value="0"><span class="val" id="brightnessVal">0</span></div>
+      <div class="slider-row"><label>Contrast</label><input type="range" id="contrast" min="-100" max="100" step="1" value="0"><span class="val" id="contrastVal">0</span></div>
+      <div class="slider-row"><label>Saturation</label><input type="range" id="saturation" min="-100" max="100" step="1" value="0"><span class="val" id="saturationVal">0</span></div>
+      <div class="slider-row"><label>Hue Rotate</label><input type="range" id="hue" min="0" max="360" step="1" value="0"><span class="val" id="hueVal">0°</span></div>
+      <div class="slider-row"><label>Blur</label><input type="range" id="blur" min="0" max="20" step="1" value="0"><span class="val" id="blurVal">0px</span></div>
+      <h4 style="margin-top:0.75rem">Presets</h4>
+      <div class="filter-grid">
+        <button class="filter-btn active" onclick="applyPreset('none')">None</button>
+        <button class="filter-btn" onclick="applyPreset('vivid')">Vivid</button>
+        <button class="filter-btn" onclick="applyPreset('bw')">B&W</button>
+        <button class="filter-btn" onclick="applyPreset('warm')">Warm</button>
+        <button class="filter-btn" onclick="applyPreset('cool')">Cool</button>
+        <button class="filter-btn" onclick="applyPreset('vintage')">Vintage</button>
+        <button class="filter-btn" onclick="applyPreset('fade')">Fade</button>
+        <button class="filter-btn" onclick="applyPreset('sharp')">Sharp</button>
+        <button class="filter-btn" onclick="applyPreset('drama')">Drama</button>
+      </div>
+      <button class="tool-btn" style="color:var(--danger)" onclick="resetFilters()">↩ Reset Filters</button>
+    </div>
+
+    <!-- TEXT PANEL -->
+    <div class="panel sidebar-section" id="panel-text">
+      <h4>Add Text Overlay</h4>
+      <div class="form-group"><label>Text Content</label><input type="text" id="textContent" placeholder="Enter your text..."></div>
+      <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+        <div><label>Font Size</label><input type="number" id="textSize" value="32" min="10" max="200"></div>
+        <div><label>Color</label><input type="color" id="textColor" value="#ffffff" style="height:38px;padding:0.2rem"></div>
+      </div>
+      <div class="form-group">
+        <label>Font Family</label>
+        <select id="textFont">
+          <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Impact">Impact</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.75rem">
+        <div><label style="font-size:0.78rem;color:var(--text-muted)">X Position (%)</label><input type="number" id="textX" value="50" min="0" max="100" style="width:100%;background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);padding:0.5rem;border-radius:var(--radius-sm);"></div>
+        <div><label style="font-size:0.78rem;color:var(--text-muted)">Y Position (%)</label><input type="number" id="textY" value="90" min="0" max="100" style="width:100%;background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);padding:0.5rem;border-radius:var(--radius-sm);"></div>
+      </div>
+      <div class="form-group">
+        <label>Background</label>
+        <select id="textBg">
+          <option value="none">None</option>
+          <option value="rgba(0,0,0,0.5)">Semi-transparent black</option>
+          <option value="rgba(0,0,0,0.8)">Dark box</option>
+          <option value="rgba(255,255,255,0.7)">Light box</option>
+          <option value="rgba(56,189,248,0.7)">Blue box</option>
+        </select>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-bottom:0.75rem" id="addTextBtn">+ Add Text</button>
+      <h4>Added Texts</h4>
+      <div id="textList"><p class="no-video-msg">No text overlays yet.</p></div>
+    </div>
+
+    <!-- AUDIO PANEL -->
+    <div class="panel sidebar-section" id="panel-audio">
+      <h4>Audio Controls</h4>
+      <div class="slider-row"><label>Volume</label><input type="range" id="volume" min="0" max="200" step="5" value="100"><span class="val" id="volumeVal">100%</span></div>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.5rem">
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.88rem">
+          <input type="checkbox" id="muteAudio"> Mute Audio
+        </label>
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.88rem">
+          <input type="checkbox" id="fadeIn"> Fade In (1s)
+        </label>
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.88rem">
+          <input type="checkbox" id="fadeOut"> Fade Out (1s)
+        </label>
+      </div>
+      <div style="margin-top:1rem">
+        <h4>Add Background Music</h4>
+        <input type="file" id="bgMusicFile" accept="audio/*" style="display:none">
+        <button class="tool-btn" onclick="document.getElementById('bgMusicFile').click()">🎵 Choose Audio File</button>
+        <div id="bgMusicName" style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem"></div>
+        <div class="slider-row" style="margin-top:0.5rem"><label>Music Volume</label><input type="range" id="bgMusicVol" min="0" max="100" step="5" value="50"><span class="val" id="bgMusicVolVal">50%</span></div>
+      </div>
+    </div>
+
+    <!-- CROP PANEL -->
+    <div class="panel sidebar-section" id="panel-crop">
+      <h4>Aspect Ratio / Crop</h4>
+      <div class="ratio-grid">
+        <button class="ratio-btn active" onclick="setRatio('free')">Free</button>
+        <button class="ratio-btn" onclick="setRatio('16:9')">16:9</button>
+        <button class="ratio-btn" onclick="setRatio('9:16')">9:16</button>
+        <button class="ratio-btn" onclick="setRatio('4:3')">4:3</button>
+        <button class="ratio-btn" onclick="setRatio('1:1')">1:1</button>
+        <button class="ratio-btn" onclick="setRatio('21:9')">21:9</button>
+        <button class="ratio-btn" onclick="setRatio('3:2')">3:2</button>
+        <button class="ratio-btn" onclick="setRatio('4:5')">4:5</button>
+      </div>
+      <h4 style="margin-top:0.75rem">Rotation / Flip</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem">
+        <button class="filter-btn" onclick="rotateVideo(-90)">↺ -90°</button>
+        <button class="filter-btn" onclick="rotateVideo(90)">↻ +90°</button>
+        <button class="filter-btn" onclick="flipVideo('h')">⇔ Flip H</button>
+        <button class="filter-btn" onclick="flipVideo('v')">⇕ Flip V</button>
+      </div>
+      <h4>Export Resolution</h4>
+      <select id="exportRes" style="width:100%;background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);padding:0.6rem;border-radius:var(--radius-sm);margin-bottom:0.5rem">
+        <option value="original">Original (keep source)</option>
+        <option value="1920x1080">1080p (1920×1080)</option>
+        <option value="1280x720">720p (1280×720)</option>
+        <option value="854x480">480p (854×480)</option>
+        <option value="640x360">360p (640×360)</option>
+        <option value="3840x2160">4K (3840×2160)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="editor-preview" id="previewArea">
+    <video id="previewVideo" style="max-width:100%;max-height:100%;object-fit:contain;display:block"></video>
+    <canvas id="previewCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="editor-timeline">
+    <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;display:flex;justify-content:space-between">
+      <span>Timeline</span>
+      <span id="durationDisplay">0:00</span>
+    </div>
+    <div class="timeline-track" id="timelineTrack">
+      <div class="timeline-thumb-strip" id="thumbStrip"></div>
+      <div class="trim-region" id="trimRegion"></div>
+      <div class="trim-handle trim-handle-left" id="trimLeft">|||</div>
+      <div class="trim-handle trim-handle-right" id="trimRight">|||</div>
+      <div class="playhead" id="playhead"></div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="editor-controls">
+    <button class="control-btn play-btn" id="playBtn">▶ Play</button>
+    <button class="control-btn" id="rewindBtn">⏮ Start</button>
+    <span class="time-display" id="currentTime">0:00.000</span>
+    <span style="color:var(--text-muted);font-size:0.8rem">/</span>
+    <span class="time-display" id="totalTime">0:00.000</span>
+    <div style="margin-left:auto;display:flex;gap:0.5rem;flex-wrap:wrap">
+      <button class="control-btn" id="snapshotBtn">📸 Snapshot</button>
+      <button class="control-btn" onclick="document.getElementById('fileInput').click()">📂 Add Clip</button>
+      <button class="btn-primary" id="exportBtn">⬇ Export Video</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay export-modal" id="exportModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeExport">✕</button>
+    <h2>Export Video</h2>
+    <div class="form-group">
+      <label>Output Format</label>
+      <select id="exportFormat">
+        <option value="video/webm">WebM (best browser support)</option>
+        <option value="video/mp4">MP4 (if browser supports)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Quality</label>
+      <select id="exportQuality">
+        <option value="4000000">High (4 Mbps)</option>
+        <option value="2000000" selected>Medium (2 Mbps)</option>
+        <option value="800000">Low (0.8 Mbps)</option>
+        <option value="8000000">Ultra (8 Mbps)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Filename</label>
+      <input type="text" id="exportFilename" value="videdit-export">
+    </div>
+    <div id="progress-container" style="margin-bottom:1rem">
+      <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.5rem" id="progressLabel">Preparing export...</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="alert-info alert" style="margin-bottom:1rem;font-size:0.82rem">
+      ℹ️ Export uses MediaRecorder API. Large videos may take a moment. The file will download automatically.
+    </div>
+    <button class="btn-primary" style="width:100%" id="startExportBtn">Start Export</button>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ===== STATE =====
+const state = {
+  files: [], currentFile: null, video: null,
+  trimStart: 0, trimEnd: 0, duration: 0,
+  playing: false, speed: 1,
+  filters: { brightness: 0, contrast: 0, saturation: 0, hue: 0, blur: 0 },
+  textOverlays: [],
+  rotation: 0, flipH: false, flipV: false,
+  ratio: 'free', exportRes: 'original',
+  volume: 1, muted: false,
+  bgMusic: null, bgMusicVolume: 0.5
+};
+
+// ===== DOM REFS =====
+const video = document.getElementById('previewVideo');
+const canvas = document.getElementById('previewCanvas');
+const ctx = canvas.getContext('2d');
+const playBtn = document.getElementById('playBtn');
+const timelineTrack = document.getElementById('timelineTrack');
+const playhead = document.getElementById('playhead');
+const trimLeft = document.getElementById('trimLeft');
+const trimRight = document.getElementById('trimRight');
+const trimRegion = document.getElementById('trimRegion');
+const dropZone = document.getElementById('drop-zone');
+const editorWrap = document.getElementById('editorWrap');
+const fileInput = document.getElementById('fileInput');
+
+// ===== FILE LOADING =====
+fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+function loadFile(file) {
+  if (!file || !file.type.startsWith('video/')) { toast('Please select a valid video file.', 'error'); return; }
+  const url = URL.createObjectURL(file);
+  video.src = url;
+  state.currentFile = file;
+  video.onloadedmetadata = () => {
+    state.duration = video.duration;
+    state.trimStart = 0;
+    state.trimEnd = video.duration;
+    dropZone.style.display = 'none';
+    editorWrap.classList.add('visible');
+    document.getElementById('exportTopBtn').style.display = 'block';
+    updateTimeDisplay();
+    updateTrimHandles();
+    updateDurationDisplay();
+    toast(`Loaded: ${file.name}`, 'success');
+    drawFrame();
+  };
+  video.load();
+}
+
+document.getElementById('newFileBtn').addEventListener('click', () => {
+  if (editorWrap.classList.contains('visible')) fileInput.click();
+  else fileInput.click();
+});
+
+// ===== PLAYBACK =====
+video.addEventListener('timeupdate', () => {
+  if (video.currentTime >= state.trimEnd) {
+    video.pause(); video.currentTime = state.trimStart;
+    playBtn.textContent = '▶ Play'; state.playing = false;
+  }
+  updateTimeDisplay(); updatePlayhead(); drawFrame();
+});
+
+playBtn.addEventListener('click', togglePlay);
+document.getElementById('rewindBtn').addEventListener('click', () => { video.currentTime = state.trimStart; updateTimeDisplay(); updatePlayhead(); });
+
+function togglePlay() {
+  if (state.playing) {
+    video.pause(); playBtn.textContent = '▶ Play'; state.playing = false;
+  } else {
+    if (video.currentTime >= state.trimEnd) video.currentTime = state.trimStart;
+    video.play(); playBtn.textContent = '⏸ Pause'; state.playing = true;
+  }
+}
+
+// ===== TIMELINE & TRIM =====
+function updatePlayhead() {
+  const pct = state.duration > 0 ? (video.currentTime / state.duration) * 100 : 0;
+  playhead.style.left = pct + '%';
+}
+
+function updateTrimHandles() {
+  const ls = (state.trimStart / state.duration) * 100;
+  const rs = (state.trimEnd / state.duration) * 100;
+  trimLeft.style.left = ls + '%';
+  trimRight.style.left = rs + '%';
+  trimRegion.style.left = ls + '%';
+  trimRegion.style.width = (rs - ls) + '%';
+  document.getElementById('trimStartDisplay').textContent = formatTime(state.trimStart);
+  document.getElementById('trimEndDisplay').textContent = formatTime(state.trimEnd);
+}
+
+function updateDurationDisplay() {
+  document.getElementById('durationDisplay').textContent = formatTime(state.duration);
+  document.getElementById('totalTime').textContent = formatTime(state.trimEnd - state.trimStart);
+}
+
+function updateTimeDisplay() {
+  document.getElementById('currentTime').textContent = formatTime(video.currentTime - state.trimStart);
+}
+
+timelineTrack.addEventListener('click', e => {
+  const rect = timelineTrack.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  video.currentTime = pct * state.duration;
+});
+
+// Drag trim handles
+let dragging = null;
+[trimLeft, trimRight].forEach((el, i) => {
+  el.addEventListener('mousedown', e => { dragging = i === 0 ? 'left' : 'right'; e.stopPropagation(); });
+});
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const rect = timelineTrack.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const t = pct * state.duration;
+  if (dragging === 'left') { state.trimStart = Math.min(t, state.trimEnd - 0.1); }
+  else { state.trimEnd = Math.max(t, state.trimStart + 0.1); }
+  updateTrimHandles(); updateDurationDisplay();
+});
+document.addEventListener('mouseup', () => { dragging = null; });
+
+// Touch support for trim
+[trimLeft, trimRight].forEach((el, i) => {
+  el.addEventListener('touchstart', e => { dragging = i === 0 ? 'left' : 'right'; e.preventDefault(); }, { passive: false });
+});
+document.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  const touch = e.touches[0];
+  const rect = timelineTrack.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+  const t = pct * state.duration;
+  if (dragging === 'left') state.trimStart = Math.min(t, state.trimEnd - 0.1);
+  else state.trimEnd = Math.max(t, state.trimStart + 0.1);
+  updateTrimHandles(); updateDurationDisplay();
+}, { passive: false });
+document.addEventListener('touchend', () => { dragging = null; });
+
+document.getElementById('setInBtn').addEventListener('click', () => { state.trimStart = video.currentTime; updateTrimHandles(); updateDurationDisplay(); });
+document.getElementById('setOutBtn').addEventListener('click', () => { state.trimEnd = video.currentTime; updateTrimHandles(); updateDurationDisplay(); });
+document.getElementById('resetTrimBtn').addEventListener('click', () => { state.trimStart = 0; state.trimEnd = state.duration; updateTrimHandles(); updateDurationDisplay(); });
+
+// ===== CANVAS OVERLAY (text & filters preview) =====
+function drawFrame() {
+  canvas.width = video.videoWidth || video.offsetWidth;
+  canvas.height = video.videoHeight || video.offsetHeight;
+  state.textOverlays.forEach(ov => {
+    const x = (ov.x / 100) * canvas.width;
+    const y = (ov.y / 100) * canvas.height;
+    ctx.font = `${ov.size}px ${ov.font}`;
+    ctx.textAlign = 'center';
+    if (ov.bg !== 'none') {
+      ctx.fillStyle = ov.bg;
+      const m = ctx.measureText(ov.text);
+      const pad = 8;
+      ctx.fillRect(x - m.width / 2 - pad, y - ov.size - pad, m.width + pad * 2, ov.size + pad * 2);
+    }
+    ctx.fillStyle = ov.color;
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(ov.text, x, y);
+    ctx.shadowBlur = 0;
+  });
+}
+
+// ===== CSS FILTER PREVIEW =====
+function buildFilterString() {
+  const f = state.filters;
+  const br = 1 + f.brightness / 100;
+  const con = 1 + f.contrast / 100;
+  const sat = 1 + f.saturation / 100;
+  return `brightness(${br}) contrast(${con}) saturate(${sat}) hue-rotate(${f.hue}deg) blur(${f.blur}px)`;
+}
+
+function applyVideoFilter() {
+  video.style.filter = buildFilterString();
+  const tf = [];
+  if (state.rotation !== 0) tf.push(`rotate(${state.rotation}deg)`);
+  if (state.flipH) tf.push('scaleX(-1)');
+  if (state.flipV) tf.push('scaleY(-1)');
+  video.style.transform = tf.join(' ');
+}
+
+// Filter sliders
+['brightness','contrast','saturation','hue','blur'].forEach(id => {
+  const el = document.getElementById(id);
+  const valEl = document.getElementById(id + 'Val');
+  el.addEventListener('input', () => {
+    state.filters[id] = parseInt(el.value);
+    const units = id === 'hue' ? '°' : id === 'blur' ? 'px' : '';
+    valEl.textContent = el.value + units;
+    applyVideoFilter();
+  });
+});
+
+// Presets
+const presets = {
+  none: { brightness: 0, contrast: 0, saturation: 0, hue: 0, blur: 0 },
+  vivid: { brightness: 10, contrast: 20, saturation: 60, hue: 0, blur: 0 },
+  bw: { brightness: 0, contrast: 10, saturation: -100, hue: 0, blur: 0 },
+  warm: { brightness: 10, contrast: 5, saturation: 20, hue: 15, blur: 0 },
+  cool: { brightness: 5, contrast: 5, saturation: 10, hue: 200, blur: 0 },
+  vintage: { brightness: -10, contrast: -10, saturation: -30, hue: 20, blur: 0 },
+  fade: { brightness: 20, contrast: -20, saturation: -20, hue: 0, blur: 0 },
+  sharp: { brightness: 5, contrast: 40, saturation: 10, hue: 0, blur: 0 },
+  drama: { brightness: -15, contrast: 50, saturation: -20, hue: 0, blur: 0 },
+};
+
+function applyPreset(name) {
+  const p = presets[name];
+  state.filters = { ...p };
+  ['brightness','contrast','saturation','hue','blur'].forEach(id => {
+    document.getElementById(id).value = p[id];
+    const units = id === 'hue' ? '°' : id === 'blur' ? 'px' : '';
+    document.getElementById(id + 'Val').textContent = p[id] + units;
+  });
+  applyVideoFilter();
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase() === name));
+}
+
+function resetFilters() { applyPreset('none'); }
+
+// ===== TEXT OVERLAYS =====
+document.getElementById('addTextBtn').addEventListener('click', () => {
+  const text = document.getElementById('textContent').value.trim();
+  if (!text) { toast('Please enter some text.', 'error'); return; }
+  const ov = {
+    id: Date.now(), text,
+    size: parseInt(document.getElementById('textSize').value),
+    color: document.getElementById('textColor').value,
+    font: document.getElementById('textFont').value,
+    x: parseInt(document.getElementById('textX').value),
+    y: parseInt(document.getElementById('textY').value),
+    bg: document.getElementById('textBg').value,
+  };
+  state.textOverlays.push(ov);
+  renderTextList();
+  document.getElementById('textContent').value = '';
+  toast('Text overlay added.', 'success');
+  drawFrame();
+});
+
+function renderTextList() {
+  const list = document.getElementById('textList');
+  if (state.textOverlays.length === 0) { list.innerHTML = '<p class="no-video-msg">No text overlays yet.</p>'; return; }
+  list.innerHTML = state.textOverlays.map(ov => `
+    <div class="overlay-text-item">
+      <span style="color:${ov.color};font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">${ov.text}</span>
+      <button onclick="removeText(${ov.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:0.85rem">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeText(id) {
+  state.textOverlays = state.textOverlays.filter(o => o.id !== id);
+  renderTextList(); drawFrame();
+}
+
+// ===== SPEED =====
+document.getElementById('speedSlider').addEventListener('input', function() {
+  const v = parseInt(this.value) / 100;
+  setSpeed(v);
+});
+
+function setSpeed(v) {
+  state.speed = v;
+  video.playbackRate = v;
+  document.getElementById('speedSlider').value = v * 100;
+  document.getElementById('speedVal').textContent = v + '×';
+}
+
+// ===== VOLUME =====
+document.getElementById('volume').addEventListener('input', function() {
+  state.volume = this.value / 100;
+  video.volume = Math.min(1, state.volume);
+  document.getElementById('volumeVal').textContent = this.value + '%';
+});
+document.getElementById('muteAudio').addEventListener('change', function() {
+  video.muted = this.checked; state.muted = this.checked;
+});
+document.getElementById('bgMusicVol').addEventListener('input', function() {
+  document.getElementById('bgMusicVolVal').textContent = this.value + '%';
+});
+document.getElementById('bgMusicFile').addEventListener('change', function() {
+  if (this.files[0]) document.getElementById('bgMusicName').textContent = '🎵 ' + this.files[0].name;
+});
+
+// ===== ROTATION / FLIP =====
+function rotateVideo(deg) { state.rotation = (state.rotation + deg + 360) % 360; applyVideoFilter(); }
+function flipVideo(dir) {
+  if (dir === 'h') state.flipH = !state.flipH;
+  else state.flipV = !state.flipV;
+  applyVideoFilter();
+}
+
+// ===== RATIO =====
+function setRatio(r) {
+  state.ratio = r;
+  document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active', b.textContent === r || b.getAttribute('onclick')?.includes(`'${r}'`)));
+  if (r === 'free') { video.style.aspectRatio = 'auto'; return; }
+  video.style.aspectRatio = r.replace(':', '/');
+}
+
+// ===== SNAPSHOT =====
+document.getElementById('snapshotBtn').addEventListener('click', () => {
+  const c = document.createElement('canvas');
+  c.width = video.videoWidth; c.height = video.videoHeight;
+  const cx = c.getContext('2d');
+  cx.drawImage(video, 0, 0);
+  state.textOverlays.forEach(ov => {
+    const x = (ov.x / 100) * c.width, y = (ov.y / 100) * c.height;
+    cx.font = `${ov.size}px ${ov.font}`; cx.textAlign = 'center';
+    if (ov.bg !== 'none') { cx.fillStyle = ov.bg; const m = cx.measureText(ov.text); cx.fillRect(x - m.width/2 - 8, y - ov.size - 8, m.width + 16, ov.size + 16); }
+    cx.fillStyle = ov.color; cx.fillText(ov.text, x, y);
+  });
+  const a = document.createElement('a');
+  a.download = 'snapshot.png'; a.href = c.toDataURL('image/png'); a.click();
+  toast('Snapshot saved!', 'success');
+});
+
+// ===== EXPORT =====
+[document.getElementById('exportBtn'), document.getElementById('exportTopBtn')].forEach(btn => {
+  btn?.addEventListener('click', () => document.getElementById('exportModal').classList.add('open'));
+});
+document.getElementById('closeExport').addEventListener('click', () => document.getElementById('exportModal').classList.remove('open'));
+
+document.getElementById('startExportBtn').addEventListener('click', async () => {
+  if (!video.src) { toast('No video loaded.', 'error'); return; }
+  const format = document.getElementById('exportFormat').value;
+  const bitrate = parseInt(document.getElementById('exportQuality').value);
+  const filename = document.getElementById('exportFilename').value || 'videdit-export';
+  const ext = format.includes('mp4') ? 'mp4' : 'webm';
+  const pc = document.getElementById('progress-container');
+  const pf = document.getElementById('progressFill');
+  const pl = document.getElementById('progressLabel');
+  pc.style.display = 'block';
+  pl.textContent = 'Setting up MediaRecorder…';
+  pf.style.width = '5%';
+
+  // Build output canvas
+  let w = video.videoWidth, h = video.videoHeight;
+  const resVal = document.getElementById('exportRes').value;
+  if (resVal !== 'original') { const parts = resVal.split('x'); w = parseInt(parts[0]); h = parseInt(parts[1]); }
+
+  const oc = document.createElement('canvas'); oc.width = w; oc.height = h;
+  const ox = oc.getContext('2d');
+  const chunks = [];
+
+  let stream;
+  try { stream = oc.captureStream(30); } catch(e) { toast('Canvas capture not supported in this browser.', 'error'); pc.style.display = 'none'; return; }
+
+  const supportedTypes = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
+  let mimeType = supportedTypes.find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+
+  const mr = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bitrate });
+  mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  mr.onstop = () => {
+    pl.textContent = 'Finalizing…'; pf.style.width = '100%';
+    const blob = new Blob(chunks, { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.download = `${filename}.${ext}`; a.href = url; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    pc.style.display = 'none'; pf.style.width = '0%';
+    document.getElementById('exportModal').classList.remove('open');
+    toast('Export complete! Check your Downloads.', 'success');
+  };
+
+  video.currentTime = state.trimStart;
+  await new Promise(r => { video.onseeked = r; });
+  mr.start(100);
+  video.playbackRate = state.speed;
+  video.muted = true;
+  video.play();
+  pl.textContent = 'Recording…';
+  const dur = state.trimEnd - state.trimStart;
+
+  const frame = () => {
+    const elapsed = video.currentTime - state.trimStart;
+    const pct = Math.min(100, (elapsed / dur) * 100);
+    pf.style.width = pct + '%';
+    pl.textContent = `Recording… ${Math.round(pct)}%`;
+
+    ox.filter = buildFilterString();
+    ox.save();
+    ox.translate(w / 2, h / 2);
+    if (state.rotation) ox.rotate(state.rotation * Math.PI / 180);
+    if (state.flipH) ox.scale(-1, 1);
+    if (state.flipV) ox.scale(1, -1);
+    ox.drawImage(video, -w / 2, -h / 2, w, h);
+    ox.restore(); ox.filter = 'none';
+
+    state.textOverlays.forEach(ov => {
+      const tx = (ov.x / 100) * w, ty = (ov.y / 100) * h;
+      ox.font = `${ov.size}px ${ov.font}`; ox.textAlign = 'center';
+      if (ov.bg !== 'none') { ox.fillStyle = ov.bg; const m = ox.measureText(ov.text); ox.fillRect(tx - m.width/2 - 8, ty - ov.size - 8, m.width + 16, ov.size + 16); }
+      ox.fillStyle = ov.color; ox.fillText(ov.text, tx, ty);
+    });
+
+    if (video.currentTime < state.trimEnd && !video.paused) requestAnimationFrame(frame);
+    else { video.pause(); mr.stop(); video.muted = state.muted; }
+  };
+  video.onseeked = null;
+  requestAnimationFrame(frame);
+});
+
+// ===== PANEL TABS =====
+document.querySelectorAll('.sidebar-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const panel = tab.dataset.panel;
+    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + panel).classList.add('active');
+  });
+});
+
+// ===== UTILS =====
+function formatTime(s) {
+  if (isNaN(s)) return '0:00.000';
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60), ms = Math.round((s % 1) * 1000);
+  return `${m}:${String(sec).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;
+}
+
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowLeft') video.currentTime = Math.max(state.trimStart, video.currentTime - 0.1);
+  if (e.code === 'ArrowRight') video.currentTime = Math.min(state.trimEnd, video.currentTime + 0.1);
+  if (e.code === 'KeyI') { state.trimStart = video.currentTime; updateTrimHandles(); updateDurationDisplay(); }
+  if (e.code === 'KeyO') { state.trimEnd = video.currentTime; updateTrimHandles(); updateDurationDisplay(); }
+});
+</script>
+</body>
+</html>

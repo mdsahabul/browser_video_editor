@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — VidEdit</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><polygon points='12,8 26,16 12,24' fill='%2338bdf8'/></svg>">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+  .values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin: 2rem 0; }
+  .value-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; }
+  .value-card .icon { font-size: 2rem; margin-bottom: 0.75rem; }
+  .value-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .value-card p { font-size: 0.85rem; color: var(--text-secondary); }
+  .tech-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+  .tech-badge { background: var(--bg-card); border: 1px solid var(--border); color: var(--accent); padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.8rem; font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0f172a"/><polygon points="12,8 26,16 12,24" fill="#38bdf8"/></svg>
+    VidEdit
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../editor.html">Editor</a></li>
+    <li><a href="about.html" class="active">About</a></li>
+    <li><a href="faq.html">FAQ</a></li>
+    <li><a href="donate.html">Donate</a></li>
+  </ul>
+  <a href="../editor.html" class="btn-primary nav-cta">Open Editor</a>
+</nav>
+
+<div class="page-hero">
+  <h1>About VidEdit</h1>
+  <p>A free, open-source video editor that runs entirely in your browser — no uploads, no accounts, no compromise.</p>
+</div>
+
+<div class="page-content" id="aboutContent">
+  <h2>What is VidEdit?</h2>
+  <p>VidEdit is a browser-based video editor built on the philosophy that powerful creative tools should be free, accessible, and private. Unlike cloud-based editors that require you to upload your footage to their servers, VidEdit processes everything locally in your browser using modern Web APIs.</p>
+  <p>Whether you need to quickly trim a video for social media, add captions to a tutorial, adjust colors on a clip, or merge multiple recordings into one — VidEdit handles it all without ever seeing your files.</p>
+
+  <h2>Our Values</h2>
+  <div class="values-grid">
+    <div class="value-card">
+      <div class="icon">🔒</div>
+      <h3>Privacy First</h3>
+      <p>Your video files never leave your device. No accounts, no tracking, no data harvesting. What you create stays with you.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon">🆓</div>
+      <h3>Free Forever</h3>
+      <p>VidEdit is and will always be free to use. No subscription tiers, no feature paywalls. Everything is available to everyone.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon">🌍</div>
+      <h3>Accessible</h3>
+      <p>Works in any modern browser on any device. No software to install, no system requirements to meet.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon">📖</div>
+      <h3>Open Source</h3>
+      <p>Every line of code is public on GitHub. You can audit it, fork it, contribute to it, or self-host it.</p>
+    </div>
+  </div>
+
+  <h2>How It Works</h2>
+  <p>VidEdit uses a suite of browser APIs that have matured significantly in recent years:</p>
+  <ul>
+    <li><strong>File API</strong> — reads your video from disk into browser memory without uploading</li>
+    <li><strong>HTML5 Video Element</strong> — decodes and plays back any browser-supported video format</li>
+    <li><strong>Canvas API</strong> — renders frames, applies filters, draws text overlays</li>
+    <li><strong>MediaRecorder API</strong> — records the processed canvas output as a video stream</li>
+    <li><strong>Web Audio API</strong> — handles volume, muting, and audio processing</li>
+    <li><strong>CSS Filters</strong> — applies real-time visual filters during playback preview</li>
+  </ul>
+
+  <h2>Technology Stack</h2>
+  <div class="tech-stack">
+    <span class="tech-badge">HTML5</span>
+    <span class="tech-badge">CSS3</span>
+    <span class="tech-badge">Vanilla JS</span>
+    <span class="tech-badge">Canvas API</span>
+    <span class="tech-badge">MediaRecorder API</span>
+    <span class="tech-badge">File API</span>
+    <span class="tech-badge">Web Audio API</span>
+    <span class="tech-badge">localStorage</span>
+  </div>
+  <p>VidEdit uses zero external JavaScript frameworks or libraries. It runs entirely on native browser APIs, which means it's fast, lightweight, and has no supply-chain dependencies.</p>
+
+  <h2>Browser Support</h2>
+  <p>VidEdit works best in modern browsers that support the MediaRecorder API:</p>
+  <ul>
+    <li>✅ Google Chrome 60+</li>
+    <li>✅ Mozilla Firefox 65+</li>
+    <li>✅ Microsoft Edge 79+</li>
+    <li>✅ Opera 47+</li>
+    <li>⚠️ Safari — limited MediaRecorder support; preview works but export may vary</li>
+    <li>❌ Internet Explorer — not supported</li>
+  </ul>
+
+  <h2>Limitations</h2>
+  <p>Being browser-based comes with some inherent tradeoffs compared to desktop applications:</p>
+  <ul>
+    <li>Export performance depends on your device's CPU — very long or high-resolution videos may take time</li>
+    <li>The exported format is primarily WebM (widely supported) with MP4 support where available</li>
+    <li>No multi-track timeline — designed for single-clip editing workflows</li>
+    <li>Safari has limited MediaRecorder support and may not export video</li>
+  </ul>
+  <p>We're continuously working to expand capabilities within the browser sandbox constraints.</p>
+
+  <h2>Contributing</h2>
+  <p>VidEdit is open source and welcomes contributions. Whether you fix a bug, add a feature, improve documentation, or simply star the repository — every contribution helps.</p>
+  <p><a href="https://github.com/" target="_blank" class="btn-primary" style="margin-top:0.5rem;display:inline-block">View on GitHub</a></p>
+
+  <h2>Contact</h2>
+  <p>Have a question, feature request, or bug report? Reach us via:</p>
+  <ul>
+    <li>Email: <a href="mailto:admin@videdit.app">admin@videdit.app</a></li>
+    <li>GitHub Issues: <a href="https://github.com/" target="_blank">Open an Issue</a></li>
+    <li>GitHub Discussions: <a href="https://github.com/" target="_blank">Community Discussions</a></li>
+  </ul>
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom" style="max-width:1100px;margin:0 auto;padding:1.5rem 2rem 0">
+    <span>© 2025 VidEdit. Open-source under MIT License.</span>
+    <a href="../index.html">Back to Home</a>
+  </div>
+</footer>
+<script>
+(function() {
+  const settings = JSON.parse(localStorage.getItem('videdit_settings') || '{}');
+  if (settings.aboutContent) document.getElementById('aboutContent').querySelector('p').textContent = settings.aboutContent;
+})();
+</script>
+</body>
+</html>
