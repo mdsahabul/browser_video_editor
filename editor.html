@@ -45,9 +45,9 @@ body { overflow: hidden; }
   overflow-x: auto;
 }
 .sidebar-tab {
-  flex: 1; min-width: 48px; padding: 0.5rem 0.25rem;
+  flex: 1; min-width: 46px; padding: 0.5rem 0.2rem;
   background: none; border: none; color: var(--text-secondary);
-  font-size: 0.68rem; cursor: pointer;
+  font-size: 0.66rem; cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all var(--transition); font-family: var(--font);
   white-space: nowrap;
@@ -274,26 +274,29 @@ body { overflow: hidden; }
 .toggle-row { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem; }
 .toggle-row label { font-size:0.8rem; color:var(--text-secondary); cursor:pointer; }
 
-/* ── Timeline resize handle ───────────────────────── */
+/* ── Timeline resize handle ─────────────────────────── */
 .tl-resize-handle {
   height: 5px; background: var(--border); cursor: ns-resize; flex-shrink: 0;
   transition: background 0.15s;
 }
 .tl-resize-handle:hover { background: var(--accent); }
 
-/* ── Keyboard shortcut hint bar ────────────────────── */
+/* ── Keyboard shortcut hint bar ─────────────────────── */
 .shortcut-bar {
   display: flex; align-items: center; gap: 1rem; padding: 0 1rem;
   background: var(--bg-surface); border-top: 1px solid var(--border);
   font-size: 0.65rem; color: var(--text-muted); flex-shrink: 0; height: 22px;
-  overflow: hidden;
+  overflow: hidden; flex-wrap: nowrap;
 }
 .shortcut-bar kbd {
   background: var(--bg-input); border: 1px solid var(--border);
-  border-radius: 3px; padding: 0 4px; font-size: 0.62rem;
+  border-radius: 3px; padding: 0 4px; font-size: 0.6rem;
   color: var(--text-secondary); font-family: var(--font-mono);
 }
-.export-modal.open { display:flex; }
+
+/* ── Export modal ──────────────────────────────────── */
+.export-modal { display:none !important; }
+.export-modal.open { display:flex !important; }
 #progress-container { display:none; }
 
 /* ── Trim display ──────────────────────────────────── */
@@ -729,7 +732,7 @@ body { overflow: hidden; }
   </div>
 
   <!-- KEYBOARD SHORTCUTS BAR -->
-  <div class="shortcut-bar" id="shortcutBar">
+  <div class="shortcut-bar">
     <span><kbd>Space</kbd> Play/Pause</span>
     <span><kbd>I</kbd> Set In</span>
     <span><kbd>O</kbd> Set Out</span>
@@ -2209,7 +2212,9 @@ document.querySelectorAll('.sidebar-tab').forEach(tab => {
   });
 })();
 
-
+// ═══════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
   if (!state.clips.length) return;
